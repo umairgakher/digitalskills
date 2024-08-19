@@ -2,7 +2,6 @@
 
 import 'package:digitalskill/colors/color.dart';
 import 'package:flutter/material.dart';
-
 import '../courses/courses.dart';
 import '../resume/resumetamplate.dart';
 
@@ -21,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Blockchain',
     'Node.js',
   ];
+
   final List<Map<String, dynamic>> items = [
     {
       'buttonText': 'Button 1',
@@ -34,7 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
       'buttonText': 'Button 3',
       'backgroundImage': 'assets/images/background3.jpg',
     },
-    // Add more items if needed
   ];
 
   @override
@@ -66,49 +65,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.02), // 2% of screen height
+              SizedBox(height: screenHeight * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'TOP COURSES',
                     style: TextStyle(
-                        fontSize: (screenHeight * 0.025),
-                        fontWeight: FontWeight.bold),
+                      fontSize: screenHeight * 0.025,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: screenHeight * 0.01), // 1% of screen height
+              SizedBox(height: screenHeight * 0.01),
               Row(
                 children: courses
                     .take(3)
                     .map((course) => Expanded(
                           child: Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal:
-                                    screenWidth * 0.01), // Space between items
+                                horizontal: screenWidth * 0.01),
                             child: GestureDetector(
                               onTap: () => {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            CourseGuideScreen()))
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CourseGuideScreen(),
+                                  ),
+                                )
                               },
                               child: Container(
-                                padding: EdgeInsets.all(screenWidth *
-                                    0.02), // Padding inside the container
+                                padding: EdgeInsets.all(screenWidth * 0.02),
                                 decoration: BoxDecoration(
                                   border: Border.all(color: Colors.black),
-                                  borderRadius:
-                                      BorderRadius.circular(30), // Radius of 30
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                                 child: Center(
                                   child: Text(
                                     course,
                                     style: TextStyle(
-                                      fontSize: (screenHeight *
-                                          0.018), // Responsive font size
+                                      fontSize: screenHeight * 0.018,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -151,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             AppColors.backgroundColor,
-                                        // Add this line to change the background color to green
                                       ),
                                       onPressed: () {
                                         Navigator.push(
@@ -161,8 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 CourseGuideScreen(),
                                           ),
                                         );
-
-                                        // Implement button action
                                       },
                                       child: Text(
                                         item['buttonText'],
@@ -176,46 +170,45 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ))
                     .toList(),
-              ), // 2% of screen height
-
-              SizedBox(height: screenHeight * 0.02), // 2% of screen height
+              ),
+              SizedBox(height: screenHeight * 0.02),
               Text(
                 'Create your Professional Resume',
                 style: TextStyle(
-                    fontSize: (screenHeight * 0.025),
-                    fontWeight: FontWeight.bold),
+                  fontSize: screenHeight * 0.025,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              SizedBox(height: screenHeight * 0.02), // 2% of screen height
+              SizedBox(height: screenHeight * 0.02),
               Container(
-                width: screenWidth, // Full width of the screen
-                height: screenHeight * 0.2, // Adjust the height as needed
+                width: screenWidth,
+                height: screenHeight * 0.25,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage(
-                        'assets/images/cardbackground.jpg'), // Replace with your image
+                    image: AssetImage('assets/images/cardbackground.jpg'),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: BorderRadius.circular(30), // Add border radius
+                  borderRadius: BorderRadius.circular(30),
                 ),
                 child: Align(
-                  alignment: Alignment
-                      .centerLeft, // Center vertically and position to the left
+                  alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 16.0), // Add some padding to the left
+                    padding: const EdgeInsets.only(left: 16.0),
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ResumeTemplateScreen()));
-                        // Implement create resume action
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ResumeTemplateScreen(),
+                          ),
+                        );
                       },
                       child: Text(
                         'Create',
                         style: TextStyle(
-                            fontSize: (screenHeight * 0.02),
-                            color: Colors.white),
+                          fontSize: screenHeight * 0.02,
+                          color: Colors.white,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.backgroundColor,

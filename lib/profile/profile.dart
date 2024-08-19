@@ -1,9 +1,13 @@
-// ignore_for_file: prefer_const_constructors, deprecated_member_use, use_key_in_widget_constructors, sort_child_properties_last, library_private_types_in_public_api, no_leading_underscores_for_local_identifiers
+// ignore_for_file: use_key_in_widget_constructors, use_build_context_synchronously, use_build_context_synchronously, use_build_context_synchronously, duplicate_ignore, library_private_types_in_public_api, deprecated_member_use, prefer_const_constructors, sort_child_properties_last, no_leading_underscores_for_local_identifiers
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/loginsignup/login.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -13,11 +17,41 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   String? profileImage;
-  String name = "Test Test";
-  String phone = "(208) 206-5039";
-  String email = "test.test@gmail.com";
-  String about =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  String name = "";
+  String phone = "";
+  String email = "";
+  String about = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        setState(() {
+          name = userData['username'] ?? '';
+          phone = userData['uPhone'] ?? '';
+          email = userData['email'] ?? '';
+          profileImage = userData['profileImage'] ?? '';
+          about = userData['aboutme'] ?? '';
+        });
+      }
+    } catch (e) {
+      // Handle error if fetching user data fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch user data: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,57 +64,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () =>
-              Navigator.pop(context), // Navigates back to the previous screen
+          onPressed: () => Navigator.pop(context),
         ),
         title: Center(
-            child: Text(
-          "Edit Profile",
-          style: TextStyle(color: Colors.white),
-        )),
+          child: Text(
+            "Edit Profile",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
         backgroundColor: AppColors.backgroundColor,
-        // 10% of the screen height
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(screenWidth * 0.04), // 4% of the screen width
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildProfileAvatar(screenWidth),
-              SizedBox(height: screenHeight * 0.03), // 3% of the screen height
-              _buildProfileInfo(
-                  "Name",
-                  name,
-                  () => _showEditDialog(context, "Name", name, (newValue) {
-                        setState(() {
-                          name = newValue;
-                        });
-                      }),
-                  textScaleFactor),
-              _buildProfileInfo(
-                  "Phone",
-                  phone,
-                  () => _showEditDialog(context, "Phone", phone, (newValue) {
-                        setState(() {
-                          phone = newValue;
-                        });
-                      }),
-                  textScaleFactor),
-              _buildProfileInfo(
-                  "Email", email, () {}, textScaleFactor), // No edit for email
-              _buildProfileInfo(
-                  "Tell Us About Yourself",
-                  about,
-                  () => _showEditDialog(context, "About", about, (newValue) {
-                        setState(() {
-                          about = newValue;
-                        });
-                      }),
-                  textScaleFactor),
-              SizedBox(
-                  height: screenHeight *
-                      0.02), // Added spacing for better visibility
+              SizedBox(height: screenHeight * 0.03),
+              _buildProfileInfo("Name", name, () {
+                _showEditDialog(context, "Name", name, (newValue) {
+                  _updateUserProfile('username', newValue);
+                });
+              }, textScaleFactor),
+              _buildProfileInfo("Phone", phone, () {
+                _showEditDialog(context, "Phone", phone, (newValue) {
+                  _updateUserProfile('uPhone', newValue);
+                });
+              }, textScaleFactor),
+              _buildProfileInfo("Email", email, () {}, textScaleFactor),
+              _buildProfileInfo("Tell Us About Yourself", about, () {
+                _showEditDialog(context, "About", about, (newValue) {
+                  _updateUserProfile('aboutme', newValue);
+                });
+              }, textScaleFactor),
+              SizedBox(height: screenHeight * 0.02),
               Center(
                 child: ElevatedButton(
                   onPressed: _logOut,
@@ -90,10 +108,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.backgroundColor,
-                    minimumSize: Size(screenWidth * 0.5,
-                        screenHeight * 0.07), // 50% width and 7% height
-                    textStyle: TextStyle(
-                        fontSize: textScaleFactor * 16), // Scaled text size
+                    minimumSize: Size(screenWidth * 0.5, screenHeight * 0.07),
+                    textStyle: TextStyle(fontSize: textScaleFactor * 16),
                   ),
                 ),
               ),
@@ -107,27 +123,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileAvatar(double screenWidth) {
     return Center(
       child: Stack(
-        clipBehavior: Clip
-            .none, // Allows the Positioned widget to extend outside the stack
+        clipBehavior: Clip.none,
         children: [
           Container(
-            width: screenWidth * 0.4, // Adjust size based on your requirements
-            height: screenWidth * 0.4, // Adjust size based on your requirements
+            width: screenWidth * 0.4,
+            height: screenWidth * 0.4,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: AppColors.backgroundColor, width: 6.0), // Blue border
+              border: Border.all(color: AppColors.backgroundColor, width: 6.0),
             ),
             child: CircleAvatar(
-              radius: screenWidth * 0.25, // 15% of screen width
-              backgroundImage: profileImage != null
+              radius: screenWidth * 0.25,
+              backgroundImage: profileImage != null && profileImage!.isNotEmpty
                   ? NetworkImage(profileImage!)
                   : AssetImage('assets/images/profilepic.png') as ImageProvider,
             ),
           ),
           Positioned(
-            bottom: -9, // Adjust positioning based on your preference
-            right: -10, // Adjust positioning based on your preference
+            bottom: -9,
+            right: -10,
             child: Container(
               padding: EdgeInsets.all(5.0),
               decoration: BoxDecoration(
@@ -137,8 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: IconButton(
                 icon: Icon(Icons.camera_alt, color: Colors.white),
                 onPressed: _pickImage,
-                iconSize: screenWidth * 0.08, // 8% of screen width
-                color: AppColors.backgroundColor, // Color for the icon
+                iconSize: screenWidth * 0.08,
               ),
             ),
           ),
@@ -151,8 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String title, String value, VoidCallback onEdit, double textScaleFactor) {
     return Padding(
       padding: EdgeInsets.symmetric(
-          vertical:
-              MediaQuery.of(context).size.height * 0.02), // 2% of screen height
+          vertical: MediaQuery.of(context).size.height * 0.02),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -165,27 +177,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.backgroundColor,
-                    fontSize: textScaleFactor * 18, // Scaled text size
+                    fontSize: textScaleFactor * 18,
                   ),
                 ),
-                SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.01), // 1% of screen height
+                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                 Text(
                   value,
                   overflow: TextOverflow.visible,
                   softWrap: true,
                   style: TextStyle(
-                    fontSize: textScaleFactor * 16, // Scaled text size
+                    fontSize: textScaleFactor * 16,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(
-              width: MediaQuery.of(context).size.width *
-                  0.02), // 2% of screen width
-          if (title != "Email") // Only show edit icon for editable fields
+          SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+          if (title != "Email")
             IconButton(
               icon: Icon(Icons.arrow_forward_ios, color: Colors.grey),
               onPressed: onEdit,
@@ -213,14 +221,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text("Save"),
               onPressed: () {
-                onSave(_controller.text); // Pass the new value back
-                Navigator.of(context).pop(); // Close the dialog
+                String newValue = _controller.text.trim();
+
+                // Perform validation
+                if (field == 'Name' &&
+                    (newValue.isEmpty || newValue.length < 3)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text('Name must be at least 3 characters long')),
+                  );
+                } else if (field == 'Phone' &&
+                    (newValue.isEmpty || newValue.length != 10)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Phone number must be exactly 10 digits long')),
+                  );
+                } else {
+                  onSave(newValue);
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],
@@ -229,20 +256,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _updateUserProfile(String field, String newValue) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({field: newValue});
+
+        // Updating local state after successful update
+        setState(() {
+          if (field == 'username') {
+            name = newValue;
+          } else if (field == 'uPhone') {
+            phone = newValue;
+          } else if (field == 'aboutme') {
+            about = newValue;
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$field updated successfully')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update $field: $e')),
+        );
+      }
+    }
+  }
+
   void _pickImage() async {
     final XFile? pickedFile =
         await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        profileImage = pickedFile.path;
-      });
+      try {
+        // Upload image to Firebase Storage
+        File imageFile = File(pickedFile.path);
+        String fileName =
+            'profile_images/${FirebaseAuth.instance.currentUser!.uid}.jpg';
+        Reference storageReference =
+            FirebaseStorage.instance.ref().child(fileName);
+        UploadTask uploadTask = storageReference.putFile(imageFile);
+        TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() {});
+        String downloadUrl = await storageTaskSnapshot.ref.getDownloadURL();
+
+        // Update profile image URL in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({'profileImage': downloadUrl});
+
+        setState(() {
+          profileImage = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profile image updated successfully')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update profile image: $e')),
+        );
+      }
     }
   }
 
-  void _logOut() {
-    Navigator.pushReplacement(
-      context,
+  void _logOut() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
+      (Route<dynamic> route) => false,
     );
   }
 }

@@ -1,11 +1,13 @@
-// ignore_for_file: unnecessary_null_comparison, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, sort_child_properties_last, avoid_print, avoid_function_literals_in_foreach_calls, prefer_const_literals_to_create_immutables
-
-import 'package:digitalskill/colors/color.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart'; // Ensure this import matches your project structure
+import 'package:digitalskill/user/resume/updateresume.dart';
 import 'package:digitalskill/widget/appbar.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:path/path.dart' as path;
 
 class AddResumes extends StatefulWidget {
   @override
@@ -15,8 +17,8 @@ class AddResumes extends StatefulWidget {
 class _AddResumesState extends State<AddResumes> {
   File? _documentFile;
   List<File> _imageFiles = [];
-  File? _backgroundImageFile;
   final ImagePicker _imagePicker = ImagePicker();
+  final TextEditingController _cvNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,8 @@ class _AddResumesState extends State<AddResumes> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildCvNameField(),
+              SizedBox(height: 24.0),
               _buildDocumentPicker(),
               SizedBox(height: 24.0),
               _buildImagePicker(),
@@ -42,24 +46,39 @@ class _AddResumesState extends State<AddResumes> {
     );
   }
 
+  Widget _buildCvNameField() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: AppColors.backgroundColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 4.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _cvNameController,
+        decoration: InputDecoration(
+          labelText: 'CV Name',
+          border: OutlineInputBorder(),
+          prefixIcon: Icon(Icons.title, color: AppColors.backgroundColor),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDocumentPicker() {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-            color: AppColors.backgroundColor), // Border for document picker
-        image: _documentFile == null
-            ? DecorationImage(
-                image: AssetImage(
-                    'assets/images/document_placeholder.png'), // Document icon
-                fit: BoxFit.cover,
-              )
-            : DecorationImage(
-                image: FileImage(_documentFile!),
-                fit: BoxFit.cover,
-              ),
+        border: Border.all(color: AppColors.backgroundColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -92,7 +111,7 @@ class _AddResumesState extends State<AddResumes> {
           SizedBox(height: 8.0),
           _documentFile != null
               ? Text(
-                  _documentFile!.path.split('/').last,
+                  path.basename(_documentFile!.path),
                   style: TextStyle(
                     fontSize: 14.0,
                     color: Colors.black54,
@@ -133,14 +152,7 @@ class _AddResumesState extends State<AddResumes> {
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-            color: AppColors.backgroundColor), // Border for image picker
-        image: _backgroundImageFile != null
-            ? DecorationImage(
-                image: FileImage(_backgroundImageFile!),
-                fit: BoxFit.cover,
-              )
-            : null,
+        border: Border.all(color: AppColors.backgroundColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -245,14 +257,18 @@ class _AddResumesState extends State<AddResumes> {
       setState(() {
         _imageFiles =
             pickedFiles.map((pickedFile) => File(pickedFile.path)).toList();
-        if (_imageFiles.isNotEmpty) {
-          _backgroundImageFile = _imageFiles.first;
-        }
       });
     }
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
+    if (_cvNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a CV name')),
+      );
+      return;
+    }
+
     if (_documentFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select a document')),
@@ -267,10 +283,43 @@ class _AddResumesState extends State<AddResumes> {
       return;
     }
 
-    // Handle form submission here
-    print('Document File: ${_documentFile?.path}');
-    _imageFiles.forEach((file) => print('Image File: ${file.path}'));
+    try {
+      // Upload document to Firebase Storage
+      String documentUrl = await _uploadFileToFirebaseStorage(_documentFile!);
 
-    // You can add logic to handle the selected files here
+      // Upload images to Firebase Storage and get their URLs
+      List<String> imageUrls = await Future.wait(
+        _imageFiles.map((file) => _uploadFileToFirebaseStorage(file)),
+      );
+
+      // Save CV name, document, and image URLs to Firestore
+      await FirebaseFirestore.instance.collection('resume').add({
+        'cvName': _cvNameController.text,
+        'documentUrl': documentUrl,
+        'imageUrls': imageUrls,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Resume added successfully!')),
+      );
+
+      // Navigate to ResumeListScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => ResumeListScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading resume: $e')),
+      );
+    }
+  }
+
+  Future<String> _uploadFileToFirebaseStorage(File file) async {
+    String fileName = path.basename(file.path);
+    Reference storageReference =
+        FirebaseStorage.instance.ref().child('resumes/$fileName');
+    UploadTask uploadTask = storageReference.putFile(file);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    return await taskSnapshot.ref.getDownloadURL();
   }
 }

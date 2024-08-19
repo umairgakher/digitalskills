@@ -1,7 +1,8 @@
 // ignore_for_file: avoid_print, avoid_function_literals_in_foreach_calls, prefer_const_declarations, prefer_const_constructors, unnecessary_to_list_in_spreads, sort_child_properties_last, library_private_types_in_public_api, use_key_in_widget_constructors, file_names
 
-import 'package:digitalskill/widget/appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/widget/appbar.dart';
 import 'package:digitalskill/colors/color.dart'; // Ensure this import matches your project's path
 
 class InterviewQuestionsScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class InterviewQuestionsScreen extends StatefulWidget {
 
 class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
   final _courseNameController = TextEditingController();
+  final _descriptionController =
+      TextEditingController(); // Controller for the description field
   final List<Map<String, TextEditingController>> _questionsAndAnswers = [
     {
       'question': TextEditingController(),
@@ -36,8 +39,9 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
     }
   }
 
-  void _saveData() {
+  Future<void> _saveData() async {
     final courseName = _courseNameController.text;
+    final description = _descriptionController.text; // Get the description text
     final questionsAndAnswersData = _questionsAndAnswers.map((item) {
       return {
         'question': item['question']?.text ?? '',
@@ -45,23 +49,38 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
       };
     }).toList();
 
-    // Print data to console or save it to a database
-    print('Course Name: $courseName');
-    for (var qa in questionsAndAnswersData) {
-      print('Question: ${qa['question']}, Answer: ${qa['answer']}');
-    }
+    // Create a reference to the Firestore collection
+    final firestore = FirebaseFirestore.instance;
+    final courseRef = firestore.collection('interviews').doc('courses');
 
-    // Clear fields
-    _courseNameController.clear();
-    _questionsAndAnswers.forEach((item) {
-      item['question']?.dispose();
-      item['answer']?.dispose();
-    });
-    _questionsAndAnswers.clear();
-    _questionsAndAnswers.add({
-      'question': TextEditingController(),
-      'answer': TextEditingController(),
-    });
+    try {
+      // Save the course data
+      await courseRef.set({
+        'course_name': courseName,
+        'description': description,
+        'questions_and_answers': questionsAndAnswersData,
+      });
+
+      print('Data saved successfully!');
+
+      // Clear fields
+      _courseNameController.clear();
+      _descriptionController.clear();
+      _questionsAndAnswers.forEach((item) {
+        item['question']?.dispose();
+        item['answer']?.dispose();
+      });
+
+      setState(() {
+        _questionsAndAnswers.clear();
+        _questionsAndAnswers.add({
+          'question': TextEditingController(),
+          'answer': TextEditingController(),
+        });
+      });
+    } catch (e) {
+      print('Failed to save data: $e');
+    }
   }
 
   @override
@@ -91,6 +110,20 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
               _buildInputField(
                 controller: _courseNameController,
                 hintText: 'Enter the course name',
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Description',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              _buildInputField(
+                controller: _descriptionController,
+                hintText: 'Enter the description',
+                maxLines: 3, // Allowing multi-line input for the description
               ),
               SizedBox(height: 20),
               Text(

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, use_key_in_widget_constructors
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, use_key_in_widget_constructors, unused_import
 
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/interview/Interview_questions_screen.dart';
@@ -6,6 +6,9 @@ import 'package:digitalskill/profile/profile.dart';
 import 'package:digitalskill/user/courses/courseslist.dart';
 import 'package:digitalskill/user/resume/addresume.dart';
 import 'package:flutter/material.dart';
+
+import '../../user/Userdashboard/interview.dart';
+import '../../user/resume/updateresume.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -93,7 +96,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddResumes()),
+                    MaterialPageRoute(builder: (context) => ResumeListScreen()),
                   );
                 },
               ),
@@ -106,8 +109,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => InterviewQuestionsScreen()),
+                    MaterialPageRoute(builder: (context) => interviewSecreen()),
                   );
                 },
               ),

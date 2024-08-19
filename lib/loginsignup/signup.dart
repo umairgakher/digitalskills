@@ -1,9 +1,10 @@
-// ignore_for_file: file_names, unnecessary_import, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last
+// ignore_for_file: file_names, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last, use_build_context_synchronously
 
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/loginsignup/login.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,10 +18,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   Widget _buildHeader() {
     return Column(
       children: [
-        SizedBox(height: 100.0), // Adjust the height as needed
+        SizedBox(height: 100.0),
         Text(
           'Sign Up',
           style: TextStyle(
@@ -55,15 +72,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle:
-            TextStyle(color: Color.fromARGB(255, 175, 183, 230)), // Blue color
+        labelStyle: TextStyle(color: Color(0xFFAFAAE6)), // Blue color
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-              color: Color.fromARGB(255, 175, 183, 230)), // Blue color
+          borderSide: BorderSide(color: Color(0xFFAFAAE6)), // Blue color
         ),
         focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-              color: Color.fromARGB(255, 175, 183, 230)), // Light blue color
+          borderSide: BorderSide(color: Color(0xFFAFAAE6)), // Light blue color
         ),
         errorBorder: UnderlineInputBorder(
           borderSide:
@@ -71,7 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Color.fromARGB(255, 175, 183, 230))
+            ? Icon(prefixIcon, color: Color(0xFFAFAAE6))
             : null,
       ),
       obscureText: obscureText,
@@ -80,18 +94,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
   Widget _buildSignUpButton(double width) {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         if (_formKey.currentState!.validate()) {
-          // Perform sign up action
-          print("Sign Up Successful");
+          try {
+            // Sign up user with Firebase Auth
+            UserCredential userCredential =
+                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: _emailController.text,
+              password: _passwordController.text,
+            );
+
+            // Get user information
+            User? user = userCredential.user;
+            if (user != null) {
+              // Store additional user information in Firestore
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .set({
+                "username": _usernameController.text,
+                "email": _emailController.text,
+                "password": _passwordController.text,
+                "createdId": DateTime.now(),
+                "uPhone": _phoneController.text,
+                "profileImage": " ",
+                'active': 0,
+                "userId": user.uid,
+                "checkuser": 0,
+                "aboutme": " "
+              });
+
+              // Successfully signed up
+              print("Sign Up Successful");
+              // Optionally navigate to a different screen
+            }
+          } on FirebaseAuthException catch (e) {
+            // Handle Firebase sign-up errors here
+            print(e.message);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.message ?? "Sign up failed")),
+            );
+          }
         }
       },
       child: const Text(
@@ -178,11 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$',
               ).hasMatch(value);
               if (!passwordValid) {
-                return 'Password must be at least 8 characters long\n'
-                    'contain at least one uppercase letter\n'
-                    'one lowercase letter\n'
-                    'one special character\n'
-                    'and one number';
+                return 'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one special character, and one number';
               }
               return null;
             },
@@ -232,15 +273,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("I have an account?",
-                  style: TextStyle(color: Color.fromARGB(255, 175, 183, 230))),
+              Text("Already have an account?",
+                  style: TextStyle(color: Color(0xFFAFAAE6))),
               TextButton(
                 onPressed: () {
                   // Navigate to login screen
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => LoginScreen()));
-
-                  print('Login pressed!');
                 },
                 child: Text(
                   'Login',
@@ -255,16 +294,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
   }
 
   @override

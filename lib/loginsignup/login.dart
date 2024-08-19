@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_import, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last
+// ignore_for_file: unnecessary_import, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last, use_build_context_synchronously
 
 import 'package:digitalskill/user/Userdashboard/user_dashboard.dart';
 import 'package:digitalskill/admin/admindashboard/admin_dashboard.dart';
@@ -6,6 +6,7 @@ import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/loginsignup/signup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -121,26 +122,43 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+  void _login() async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-    if (email == "admin@gmail.com" && password == "Admin123") {
-      // Navigate to admin dashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminDashboard()),
-      );
-    } else if (email == "user@gmail.com" && password == "User123456") {
-      // Navigate to user dashboard
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => UserDashboard()),
-      );
-    } else {
-      // Show error message
+      User? user = userCredential.user;
+      if (user != null) {
+        // Navigate to dashboard based on user role
+        if (user.email == "admin@gmail.com") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AdminDashboard()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => UserDashboard()),
+          );
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = '';
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Wrong password provided.';
+          break;
+        default:
+          errorMessage = 'Something went wrong. Please try again.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid email or password')),
+        SnackBar(content: Text(errorMessage)),
       );
     }
   }

@@ -1,10 +1,13 @@
-// ignore_for_file: deprecated_member_use, prefer_const_constructors, library_private_types_in_public_api, use_key_in_widget_constructors, file_names, prefer_const_literals_to_create_immutables
+// ignore_for_file: deprecated_member_use, prefer_const_constructors, library_private_types_in_public_api, use_key_in_widget_constructors, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
 import 'dart:async';
 import 'package:digitalskill/colors/color.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:digitalskill/user/secreens/navigator.dart'; // Ensure this path is correct
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:digitalskill/user/Userdashboard/user_dashboard.dart';
+import 'package:digitalskill/admin/admindashboard/admin_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -15,18 +18,40 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to WelcomeScreen after 10 seconds
-    Timer(Duration(seconds: 4), () {
+    _checkUserLogin();
+  }
+
+  void _checkUserLogin() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Delay navigation to show the splash screen for at least 4 seconds
+    await Future.delayed(Duration(seconds: 4));
+
+    if (user != null) {
+      // User is logged in, navigate based on role
+      if (user.email == "admin@gmail.com") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AdminDashboard()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserDashboard()),
+        );
+      }
+    } else {
+      // User is not logged in, navigate to WelcomeScreen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => WelcomeScreen()),
       );
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the width of the screen
+    // Get the width and height of the screen
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -53,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-                speed: Duration(milliseconds: 4),
+                speed: Duration(milliseconds: 200),
                 totalRepeatCount: 1,
               ),
             ],
