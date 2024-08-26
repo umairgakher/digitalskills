@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, unused_element, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, unused_element, prefer_const_literals_to_create_immutables, unused_local_variable, unused_field
 
 import 'package:digitalskill/user/Userdashboard/home.dart';
 import 'package:digitalskill/user/Userdashboard/interview.dart';
@@ -27,6 +27,7 @@ class UserDashboard extends StatefulWidget {
 class _UserDashboardState extends State<UserDashboard> {
   int _selectedIndex = 0;
   String? text = "Courses";
+  double _appBarHeight = 60;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -48,14 +49,22 @@ class _UserDashboardState extends State<UserDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    _appBarHeight = screenHeight * 0.07;
+
     return Scaffold(
       key: widget._scaffoldKey,
       appBar: AppBar(
         title: Center(
-            child: Text(
-          text!,
-          style: TextStyle(color: Colors.white),
-        )),
+          child: Text(
+            text!,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: screenHeight * 0.03,
+            ),
+          ),
+        ),
         backgroundColor: AppColors.backgroundColor,
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -75,7 +84,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   shape: BoxShape.circle,
                 ),
                 child: CircleAvatar(
-                  radius: 80,
+                  radius: 20,
                   backgroundColor: Colors.white,
                   child: Icon(
                     Icons.person,
@@ -99,7 +108,10 @@ class _UserDashboardState extends State<UserDashboard> {
           children: [
             ListTile(
               leading: Icon(Icons.list),
-              title: Text("Item 1"),
+              title: Text(
+                "Item 1",
+                style: TextStyle(fontSize: screenHeight * 0.025),
+              ),
               trailing: Icon(Icons.done),
             ),
           ],
@@ -153,14 +165,17 @@ class _UserDashboardState extends State<UserDashboard> {
         return HomeScreen();
       case 1:
         text = "Interview";
-        return interviewSecreen();
+        return InterviewScreen();
       case 2:
         text = "Courses";
         return CoursesScreen();
       case 3:
         text = "Profile";
         return Container(
-          child: Text("profile"),
+          child: Text(
+            "profile",
+            style: TextStyle(fontSize: 20),
+          ),
         );
       default:
         return Container();

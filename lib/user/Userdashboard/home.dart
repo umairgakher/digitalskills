@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, sort_child_properties_last
+// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, sort_child_properties_last, avoid_print
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
 import 'package:flutter/material.dart';
 import '../courses/courses.dart';
@@ -13,28 +14,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> courses = [
-    'Flutter',
-    'Python',
-    'React JS',
-    'Blockchain',
-    'Node.js',
-  ];
+  List<Map<String, dynamic>> courses = [];
 
-  final List<Map<String, dynamic>> items = [
-    {
-      'buttonText': 'Button 1',
-      'backgroundImage': 'assets/images/cardbackground.jpg',
-    },
-    {
-      'buttonText': 'Button 2',
-      'backgroundImage': 'assets/images/cardbackground.jpg',
-    },
-    {
-      'buttonText': 'Button 3',
-      'backgroundImage': 'assets/images/background3.jpg',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchCourses();
+  }
+
+  Future<void> fetchCourses() async {
+    final QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('courses').limit(3).get();
+
+    setState(() {
+      courses = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,17 +78,19 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: screenHeight * 0.01),
               Row(
                 children: courses
-                    .take(3)
                     .map((course) => Expanded(
                           child: Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: screenWidth * 0.01),
                             child: GestureDetector(
                               onTap: () => {
+                                print(course),
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => CourseGuideScreen(),
+                                    builder: (context) => CourseGuideScreen(
+                                      courseDetails: course,
+                                    ),
                                   ),
                                 )
                               },
@@ -103,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    course,
+                                    course['name'].toString().toUpperCase(),
                                     style: TextStyle(
                                       fontSize: screenHeight * 0.018,
                                       fontWeight: FontWeight.bold,
@@ -119,9 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: screenHeight * 0.02),
               Row(
-                children: items
+                children: courses
                     .take(2)
-                    .map((item) => Expanded(
+                    .map((course) => Expanded(
                           child: Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: screenWidth * 0.01),
@@ -130,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: screenHeight * 0.25,
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                  image: AssetImage(item['backgroundImage']),
+                                  image: NetworkImage(course['logo_image']),
                                   fit: BoxFit.cover,
                                 ),
                                 borderRadius: BorderRadius.circular(30),
@@ -154,12 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                CourseGuideScreen(),
+                                                CourseGuideScreen(
+                                              courseDetails: course,
+                                            ),
                                           ),
                                         );
                                       },
                                       child: Text(
-                                        item['buttonText'],
+                                        course['name'].toString().toUpperCase(),
                                         style: TextStyle(color: Colors.white),
                                       ),
                                     ),

@@ -18,7 +18,10 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
   final List<Map<String, TextEditingController>> _questionsAndAnswers = [
     {
       'question': TextEditingController(),
-      'answer': TextEditingController(),
+      'answer1': TextEditingController(),
+      'answer2': TextEditingController(),
+      'answer3': TextEditingController(),
+      'correctAnswer': TextEditingController(),
     }
   ];
 
@@ -26,7 +29,10 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
     setState(() {
       _questionsAndAnswers.add({
         'question': TextEditingController(),
-        'answer': TextEditingController(),
+        'answer1': TextEditingController(),
+        'answer2': TextEditingController(),
+        'answer3': TextEditingController(),
+        'correctAnswer': TextEditingController(),
       });
     });
   }
@@ -45,13 +51,18 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
     final questionsAndAnswersData = _questionsAndAnswers.map((item) {
       return {
         'question': item['question']?.text ?? '',
-        'answer': item['answer']?.text ?? '',
+        'answers': [
+          item['answer1']?.text ?? '',
+          item['answer2']?.text ?? '',
+          item['answer3']?.text ?? '',
+        ],
+        'correct_answer': item['correctAnswer']?.text ?? '',
       };
     }).toList();
 
     // Create a reference to the Firestore collection
     final firestore = FirebaseFirestore.instance;
-    final courseRef = firestore.collection('interviews').doc('courses');
+    final courseRef = firestore.collection('interviews').doc();
 
     try {
       // Save the course data
@@ -68,14 +79,20 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
       _descriptionController.clear();
       _questionsAndAnswers.forEach((item) {
         item['question']?.dispose();
-        item['answer']?.dispose();
+        item['answer1']?.dispose();
+        item['answer2']?.dispose();
+        item['answer3']?.dispose();
+        item['correctAnswer']?.dispose();
       });
 
       setState(() {
         _questionsAndAnswers.clear();
         _questionsAndAnswers.add({
           'question': TextEditingController(),
-          'answer': TextEditingController(),
+          'answer1': TextEditingController(),
+          'answer2': TextEditingController(),
+          'answer3': TextEditingController(),
+          'correctAnswer': TextEditingController(),
         });
       });
     } catch (e) {
@@ -179,7 +196,7 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        'Answer $index',
+                        'Answer 1',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -187,8 +204,47 @@ class _InterviewQuestionsScreenState extends State<InterviewQuestionsScreen> {
                       ),
                       SizedBox(height: 8),
                       _buildInputField(
-                        controller: item['answer']!,
-                        hintText: 'Enter the answer',
+                        controller: item['answer1']!,
+                        hintText: 'Enter the first answer',
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Answer 2',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      _buildInputField(
+                        controller: item['answer2']!,
+                        hintText: 'Enter the second answer',
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Answer 3',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      _buildInputField(
+                        controller: item['answer3']!,
+                        hintText: 'Enter the third answer',
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Correct Answer',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      _buildInputField(
+                        controller: item['correctAnswer']!,
+                        hintText: 'Enter the correct answer',
                       ),
                     ],
                   ),

@@ -109,7 +109,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => interviewSecreen()),
+                    MaterialPageRoute(builder: (context) => InterviewScreen()),
                   );
                 },
               ),

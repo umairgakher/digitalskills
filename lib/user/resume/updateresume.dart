@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable, unnecessary_null_comparison, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, sort_child_properties_last, use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/user/resume/addresume.dart';

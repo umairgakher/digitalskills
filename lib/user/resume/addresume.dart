@@ -1,6 +1,7 @@
+// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, use_build_context_synchronously, unnecessary_null_comparison, use_key_in_widget_constructors
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:digitalskill/colors/color.dart'; // Ensure this import matches your project structure
-import 'package:digitalskill/user/resume/updateresume.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/widget/appbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -22,23 +23,27 @@ class _AddResumesState extends State<AddResumes> {
 
   @override
   Widget build(BuildContext context) {
+    // Media Query for responsive design
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: CustomAppBar(
         title: "Add Resume",
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(width * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCvNameField(),
-              SizedBox(height: 24.0),
-              _buildDocumentPicker(),
-              SizedBox(height: 24.0),
-              _buildImagePicker(),
-              SizedBox(height: 24.0),
-              _buildSubmitButton(),
+              _buildCvNameField(width, height),
+              SizedBox(height: height * 0.03),
+              _buildDocumentPicker(width, height),
+              SizedBox(height: height * 0.03),
+              _buildImagePicker(width, height),
+              SizedBox(height: height * 0.03),
+              _buildSubmitButton(width, height),
             ],
           ),
         ),
@@ -46,18 +51,18 @@ class _AddResumesState extends State<AddResumes> {
     );
   }
 
-  Widget _buildCvNameField() {
+  Widget _buildCvNameField(double width, double height) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(width * 0.03),
         border: Border.all(color: AppColors.backgroundColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 4.0,
-            offset: Offset(0, 2),
+            blurRadius: width * 0.02,
+            offset: Offset(0, height * 0.005),
           ),
         ],
       ),
@@ -72,18 +77,18 @@ class _AddResumesState extends State<AddResumes> {
     );
   }
 
-  Widget _buildDocumentPicker() {
+  Widget _buildDocumentPicker(double width, double height) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(width * 0.03),
         border: Border.all(color: AppColors.backgroundColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 4.0,
-            offset: Offset(0, 2),
+            blurRadius: width * 0.02,
+            offset: Offset(0, height * 0.005),
           ),
         ],
       ),
@@ -94,50 +99,50 @@ class _AddResumesState extends State<AddResumes> {
             children: [
               Icon(
                 Icons.insert_drive_file,
-                size: 24.0,
+                size: width * 0.06,
                 color: AppColors.backgroundColor,
               ),
-              SizedBox(width: 8.0),
+              SizedBox(width: width * 0.02),
               Text(
                 'Upload Resume (Document)',
                 style: TextStyle(
-                  fontSize: 16.0,
+                  fontSize: width * 0.04,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8.0),
+          SizedBox(height: height * 0.01),
           _documentFile != null
               ? Text(
                   path.basename(_documentFile!.path),
                   style: TextStyle(
-                    fontSize: 14.0,
+                    fontSize: width * 0.035,
                     color: Colors.black54,
                   ),
                 )
               : Container(
-                  height: 100,
+                  height: height * 0.13,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(width * 0.02),
                     border: Border.all(color: AppColors.backgroundColor),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.insert_drive_file,
-                      size: 50.0,
+                      size: width * 0.13,
                       color: Colors.grey[600],
                     ),
                   ),
                 ),
-          SizedBox(height: 12.0),
+          SizedBox(height: height * 0.015),
           Center(
             child: IconButton(
               icon: Icon(Icons.insert_drive_file,
-                  size: 32.0, color: AppColors.backgroundColor),
+                  size: width * 0.08, color: AppColors.backgroundColor),
               onPressed: _pickDocument,
             ),
           ),
@@ -146,18 +151,18 @@ class _AddResumesState extends State<AddResumes> {
     );
   }
 
-  Widget _buildImagePicker() {
+  Widget _buildImagePicker(double width, double height) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(width * 0.03),
         border: Border.all(color: AppColors.backgroundColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 4.0,
-            offset: Offset(0, 2),
+            blurRadius: width * 0.02,
+            offset: Offset(0, height * 0.005),
           ),
         ],
       ),
@@ -167,49 +172,49 @@ class _AddResumesState extends State<AddResumes> {
           Text(
             'Upload Images',
             style: TextStyle(
-              fontSize: 16.0,
+              fontSize: width * 0.04,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 8.0),
+          SizedBox(height: height * 0.01),
           _imageFiles.isNotEmpty
               ? Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
+                  spacing: width * 0.02,
+                  runSpacing: width * 0.02,
                   children: _imageFiles.map((file) {
                     return ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(width * 0.02),
                       child: Image.file(
                         file,
-                        width: 100,
-                        height: 100,
+                        width: width * 0.25,
+                        height: height * 0.13,
                         fit: BoxFit.cover,
                       ),
                     );
                   }).toList(),
                 )
               : Container(
-                  height: 100,
+                  height: height * 0.13,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(width * 0.02),
                     border: Border.all(color: AppColors.backgroundColor),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.add_photo_alternate,
-                      size: 50.0,
+                      size: width * 0.13,
                       color: Colors.grey[600],
                     ),
                   ),
                 ),
-          SizedBox(height: 12.0),
+          SizedBox(height: height * 0.015),
           Center(
             child: IconButton(
               icon: Icon(Icons.add_photo_alternate,
-                  size: 32.0, color: AppColors.backgroundColor),
+                  size: width * 0.08, color: AppColors.backgroundColor),
               onPressed: _pickImages,
             ),
           ),
@@ -218,20 +223,21 @@ class _AddResumesState extends State<AddResumes> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(double width, double height) {
     return Center(
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.backgroundColor,
-          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+          padding: EdgeInsets.symmetric(
+              horizontal: width * 0.1, vertical: height * 0.02),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(width * 0.02),
           ),
         ),
         child: Text(
           'Submit',
-          style: TextStyle(fontSize: 16.0, color: Colors.white),
+          style: TextStyle(fontSize: width * 0.04, color: Colors.white),
         ),
       ),
     );
@@ -293,23 +299,21 @@ class _AddResumesState extends State<AddResumes> {
       );
 
       // Save CV name, document, and image URLs to Firestore
-      await FirebaseFirestore.instance.collection('resume').add({
-        'cvName': _cvNameController.text,
-        'documentUrl': documentUrl,
-        'imageUrls': imageUrls,
+      await FirebaseFirestore.instance.collection('resumes').add({
+        'cv_name': _cvNameController.text,
+        'document_url': documentUrl,
+        'image_urls': imageUrls,
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Resume added successfully!')),
+        SnackBar(content: Text('Resume added successfully')),
       );
 
-      // Navigate to ResumeListScreen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => ResumeListScreen()),
-      );
+      Navigator.pop(context); // Go back to the previous screen
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading resume: $e')),
+        SnackBar(content: Text('Failed to add resume: $e')),
       );
     }
   }
@@ -317,9 +321,9 @@ class _AddResumesState extends State<AddResumes> {
   Future<String> _uploadFileToFirebaseStorage(File file) async {
     String fileName = path.basename(file.path);
     Reference storageReference =
-        FirebaseStorage.instance.ref().child('resumes/$fileName');
+        FirebaseStorage.instance.ref().child('resume_files/$fileName');
     UploadTask uploadTask = storageReference.putFile(file);
-    TaskSnapshot taskSnapshot = await uploadTask;
-    return await taskSnapshot.ref.getDownloadURL();
+    TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
   }
 }

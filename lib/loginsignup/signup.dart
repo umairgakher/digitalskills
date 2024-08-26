@@ -120,9 +120,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 "createdId": DateTime.now(),
                 "uPhone": _phoneController.text,
                 "profileImage": " ",
-                'active': 0,
+                // 'active': 0,
                 "userId": user.uid,
-                "checkuser": 0,
+                "checkuser": "user",
                 "aboutme": " "
               });
 

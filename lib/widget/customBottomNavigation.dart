@@ -41,7 +41,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         },
         children: [
           HomeScreen(), // Page for index 0
-          interviewSecreen(), // Page for index 1
+          InterviewScreen(), // Page for index 1
           CoursesScreen(), // Page for index 2
           ProfileScreen(), // Page for index 3
         ],
