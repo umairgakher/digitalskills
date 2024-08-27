@@ -119,7 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 "password": _passwordController.text,
                 "createdId": DateTime.now(),
                 "uPhone": _phoneController.text,
-                "profileImage": " ",
+                "profileImage": "",
                 // 'active': 0,
                 "userId": user.uid,
                 "checkuser": "user",

@@ -50,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 height: screenHeight * 0.06,
                 child: TextField(
+                  textAlignVertical:
+                      TextAlignVertical.center, // Center text vertically
                   decoration: InputDecoration(
                     hintText: 'Looking for something...',
                     border: OutlineInputBorder(
@@ -59,6 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     filled: true,
                     fillColor: Colors.white,
                     prefixIcon: Icon(Icons.search),
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: 8), // Adjust vertical padding if needed
                   ),
                 ),
               ),

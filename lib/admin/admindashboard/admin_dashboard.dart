@@ -1,72 +1,215 @@
 // ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, use_key_in_widget_constructors, unused_import
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/interview/Interview_questions_screen.dart';
+import 'package:digitalskill/loginsignup/login.dart';
 import 'package:digitalskill/profile/profile.dart';
+import 'package:digitalskill/user/Userdashboard/coursesSecreen.dart';
 import 'package:digitalskill/user/courses/courseslist.dart';
 import 'package:digitalskill/user/resume/addresume.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../user/Userdashboard/interview.dart';
 import '../../user/resume/updateresume.dart';
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+  AdminDashboard({super.key});
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+  String? _userName;
+  String? _userEmail;
+  String? _profileImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+  }
+
+  Future<void> _fetchUserDetails() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _userName = userDoc['username']; // Assuming 'username' field exists
+        _userEmail = userDoc['email']; // Assuming 'email' field exists
+        _profileImageUrl = userDoc[
+            'profileImage']; // Assuming 'profile_image_url' field exists
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
 
     return Scaffold(
+      key: widget._scaffoldKey,
       appBar: AppBar(
         title: Center(
-            child: Text(
-          "Dashboard",
-          style: TextStyle(color: Colors.white),
-        )),
+          child: Text(
+            "Admin Dashboard",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: screenHeight * 0.03,
+            ),
+          ),
+        ),
         backgroundColor: AppColors.backgroundColor,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.menu),
           color: Colors.white,
           onPressed: () {
-            Scaffold.of(context).openDrawer();
+            widget._scaffoldKey.currentState!.openDrawer();
           },
         ),
-        actions: [
-          IconButton(
-            icon: Container(
-              width: 50,
-              alignment: Alignment.topLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: CircleAvatar(
-                  radius: 80,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 20,
-                    color: Colors.black,
-                  ),
-                ),
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            // Drawer Header
+            UserAccountsDrawerHeader(
+              accountName: Text(_userName ?? "User Name"),
+              accountEmail: Text(_userEmail ?? "user@example.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                backgroundImage: _profileImageUrl != null
+                    ? NetworkImage(_profileImageUrl!)
+                    : null,
+                child: _profileImageUrl == null
+                    ? Icon(Icons.person,
+                        color: AppColors.backgroundColor, size: 50)
+                    : null,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
               ),
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-            },
-          )
-        ],
+            // Drawer Items
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                    leading: Icon(
+                      Icons.home,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Home",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AdminDashboard()),
+                    ), // Home
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.access_time,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Interview",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => InterviewScreen()),
+                      );
+                    }, // Interview
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.document_scanner,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Resume",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ResumeListScreen()),
+                      );
+                    }, // Resume
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.favorite,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Courses",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CoursesScreen()),
+                      );
+                    }, // Courses
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.person,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Profile",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfileScreen()),
+                      );
+                    }, // Profile
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.logout,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Logout",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (Route<dynamic> route) => false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -75,43 +218,42 @@ class _AdminDashboardState extends State<AdminDashboard> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildDashboardItem(
-                title: '',
-                screenHeight: screenHeight,
+                title: 'Courses',
                 height: screenHeight * 0.25, // 25% of screen height
-                backgroundImage: AssetImage('assets/images/onlineCourse.jpg'),
+                backgroundColor: AppColors.backgroundColor,
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => CoursesScreenliting()),
+                    MaterialPageRoute(builder: (context) => CoursesScreen()),
                   );
                 },
+                screenHeight: screenHeight,
               ),
               SizedBox(height: 16.0), // Spacing between items
               _buildDashboardItem(
                 title: 'CV/Resume',
                 height: screenHeight * 0.25, // 25% of screen height
-                screenHeight: screenHeight,
-                backgroundImage: AssetImage('assets/images/resume.jpg'),
+                backgroundColor: AppColors.backgroundColor,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => ResumeListScreen()),
                   );
                 },
+                screenHeight: screenHeight,
               ),
               SizedBox(height: 16.0), // Spacing between items
               _buildDashboardItem(
-                title: 'Interview Questions & Answers',
+                title: 'Interviews',
                 height: screenHeight * 0.25, // 25% of screen height
-                screenHeight: screenHeight,
-                backgroundImage: AssetImage('assets/images/interveiw.png'),
+                backgroundColor: AppColors.backgroundColor,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => InterviewScreen()),
                   );
                 },
+                screenHeight: screenHeight,
               ),
             ],
           ),
@@ -123,7 +265,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _buildDashboardItem({
     required String title,
     required double height,
-    required ImageProvider backgroundImage,
+    required Color backgroundColor,
     required VoidCallback onTap,
     required double screenHeight,
   }) {
@@ -133,10 +275,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         height: height,
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: backgroundImage,
-            fit: BoxFit.cover,
-          ),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: [
             BoxShadow(
@@ -153,24 +292,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
             style: TextStyle(
               fontSize: screenHeight * 0.04,
               fontWeight: FontWeight.bold,
-              color: AppColors
-                  .backgroundColor, // Ensure text is visible on the background
+              color: Colors.white, // Ensure text is visible on the background
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-// Placeholder screens for navigation
-
-class InterviewQA extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Interview Questions & Answers')),
-      body: Center(child: Text('Interview Questions & Answers Screen')),
     );
   }
 }

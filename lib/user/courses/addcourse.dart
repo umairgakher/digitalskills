@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, library_private_types_in_public_api, sort_child_properties_last, prefer_const_literals_to_create_immutables, use_build_context_synchronously, avoid_print, unused_element
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:digitalskill/user/courses/courseslist.dart';
+import 'package:digitalskill/user/Userdashboard/coursesSecreen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -324,7 +324,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
       // Navigate to CoursesScreen
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => CoursesScreenliting()),
+        MaterialPageRoute(builder: (context) => CoursesScreen()),
       );
     } catch (e) {
       print(e);

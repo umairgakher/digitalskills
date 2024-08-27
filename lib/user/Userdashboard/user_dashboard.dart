@@ -1,12 +1,15 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, unused_element, prefer_const_literals_to_create_immutables, unused_local_variable, unused_field
+// ignore_for_file: unused_field, unused_local_variable, unused_element, prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/user/Userdashboard/home.dart';
 import 'package:digitalskill/user/Userdashboard/interview.dart';
-import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/profile/profile.dart';
-import 'package:flutter/material.dart';
+import 'package:digitalskill/user/Userdashboard/coursesSecreen.dart';
 
-import 'coursesSecreen.dart';
+import '../../loginsignup/login.dart';
 
 class UserDashboard extends StatefulWidget {
   UserDashboard({super.key});
@@ -28,6 +31,33 @@ class _UserDashboardState extends State<UserDashboard> {
   int _selectedIndex = 0;
   String? text = "Courses";
   double _appBarHeight = 60;
+  User? _user;
+  String? _userName;
+  String? _userEmail;
+  String? _profileImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+  }
+
+  Future<void> _fetchUserDetails() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _user = user;
+        _userName = userDoc['username']; // Assuming 'username' field exists
+        _userEmail = userDoc['email']; // Assuming 'email' field exists
+        _profileImageUrl = userDoc[
+            'profileImage']; // Assuming 'profile_image_url' field exists
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -45,6 +75,11 @@ class _UserDashboardState extends State<UserDashboard> {
         text = "Profile";
       }
     });
+  }
+
+  void _onDrawerItemTapped(int index) {
+    Navigator.of(context).pop(); // Close the drawer
+    _onItemTapped(index); // Update the selected index and text
   }
 
   @override
@@ -71,48 +106,103 @@ class _UserDashboardState extends State<UserDashboard> {
           icon: Icon(Icons.menu),
           color: Colors.white,
           onPressed: () {
-            Scaffold.of(context).openDrawer();
+            widget._scaffoldKey.currentState!.openDrawer();
           },
         ),
-        actions: [
-          IconButton(
-            icon: Container(
-              width: 50,
-              alignment: Alignment.topLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 20,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-            },
-          )
-        ],
       ),
       drawer: Drawer(
-        child: ListView(
+        child: Column(
           children: [
-            ListTile(
-              leading: Icon(Icons.list),
-              title: Text(
-                "Item 1",
-                style: TextStyle(fontSize: screenHeight * 0.025),
+            // Drawer Header
+            UserAccountsDrawerHeader(
+              accountName: Text(_userName ?? "User Name"),
+              accountEmail: Text(_userEmail ?? "user@example.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                backgroundImage: _profileImageUrl != null
+                    ? NetworkImage(_profileImageUrl!)
+                    : null,
+                child: _profileImageUrl == null
+                    ? Icon(Icons.person,
+                        color: AppColors.backgroundColor, size: 50)
+                    : null,
               ),
-              trailing: Icon(Icons.done),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
+              ),
+            ),
+            // Drawer Items
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                    leading: Icon(
+                      Icons.home,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Home",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () => _onDrawerItemTapped(0), // Home
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.access_time,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Interview",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () => _onDrawerItemTapped(1), // Interview
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.favorite,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Courses",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () => _onDrawerItemTapped(2), // Courses
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.person,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Profile",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () => _onDrawerItemTapped(3), // Profile
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.logout,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Logout",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      // Implement logout functionality here FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (Route<dynamic> route) => false,
+                      );
+                      // Navigate to login screen or show a confirmation dialog
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -148,7 +238,7 @@ class _UserDashboardState extends State<UserDashboard> {
               width: 6,
               height: 6,
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: AppColors.backgroundColor,
                 shape: BoxShape.circle,
               ),
             ),
@@ -171,12 +261,7 @@ class _UserDashboardState extends State<UserDashboard> {
         return CoursesScreen();
       case 3:
         text = "Profile";
-        return Container(
-          child: Text(
-            "profile",
-            style: TextStyle(fontSize: 20),
-          ),
-        );
+        return ProfileScreen();
       default:
         return Container();
     }

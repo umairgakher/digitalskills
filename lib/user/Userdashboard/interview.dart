@@ -1,7 +1,9 @@
 // ignore_for_file: camel_case_types, prefer_const_constructors, duplicate_ignore, sort_child_properties_last, avoid_print, prefer_final_fields
 
 import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/interview/editinterview.dart';
 import 'package:digitalskill/interview/user_interview.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -60,7 +62,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: userEmail == 'admin@gmail.com'
+      appBar: loginController().checkuser == 'admin'
           ? CustomAppBar(title: "Courses")
           : null,
       body: ListView.builder(
@@ -81,10 +83,16 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => UserInterviewsPage(
-                        InterviewId: interview['id'],
-                        interview: interview,
-                      ),
+                      builder: (context) =>
+                          loginController().checkuser == 'admin'
+                              ? AdminEditInterviewPage(
+                                  interviewId: interview['id'],
+                                  interview: interview,
+                                )
+                              : UserInterviewsPage(
+                                  InterviewId: interview['id'],
+                                  interview: interview,
+                                ),
                     ),
                   );
                 },
@@ -115,7 +123,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
           );
         },
       ),
-      floatingActionButton: userEmail == 'admin@gmail.com'
+      floatingActionButton: loginController().checkuser == 'admin'
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.push(

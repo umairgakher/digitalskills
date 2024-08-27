@@ -1,7 +1,9 @@
-// ignore_for_file: deprecated_member_use, prefer_const_constructors, library_private_types_in_public_api, use_key_in_widget_constructors, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
+// ignore_for_file: deprecated_member_use, prefer_const_constructors, library_private_types_in_public_api, use_key_in_widget_constructors, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously, unused_local_variable
 
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:digitalskill/user/secreens/navigator.dart'; // Ensure this path is correct
@@ -15,10 +17,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  String? checkuser;
   @override
   void initState() {
+    User? user = FirebaseAuth.instance.currentUser;
     super.initState();
     _checkUserLogin();
+    fetchUserData(user?.uid ?? '');
+  }
+
+  Future<Map<String, dynamic>?> fetchUserData(String uid) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        checkuser = userDoc['checkuser'];
+        loginController().checkuser = userDoc['checkuser'];
+        return userDoc.data() as Map<String, dynamic>?;
+      }
+    }
+    return null;
   }
 
   void _checkUserLogin() async {
@@ -29,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (user != null) {
       // User is logged in, navigate based on role
-      if (user.email == "admin@gmail.com") {
+      if (checkuser == "admin") {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminDashboard()),

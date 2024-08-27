@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
 import 'package:digitalskill/user/courses/addcourse.dart';
 import 'package:digitalskill/widget/appbar.dart';
 import 'package:flutter/material.dart';
@@ -179,21 +180,23 @@ class _CoursesScreenlitingState extends State<CoursesScreenliting> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddCourseScreen(),
-            ),
-          );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-        backgroundColor: AppColors.backgroundColor,
-      ),
+      floatingActionButton: loginController().checkuser == "admin"
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddCourseScreen(),
+                  ),
+                );
+              },
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              backgroundColor: AppColors.backgroundColor,
+            )
+          : SizedBox(),
     );
   }
 
@@ -238,7 +241,7 @@ class _CoursesScreenlitingState extends State<CoursesScreenliting> {
                     width: containerWidth,
                     height: containerHeight,
                     padding: EdgeInsets.all(containerWidth *
-                        0.02), // Adjust padding based on container width
+                        0.002), // Adjust padding based on container width
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(borderRadius),

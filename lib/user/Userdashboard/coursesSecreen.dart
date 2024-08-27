@@ -1,9 +1,14 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, sized_box_for_whitespace, sort_child_properties_last
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
+import 'package:digitalskill/widget/appbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:digitalskill/user/courses/courses.dart';
+
+import '../courses/addcourse.dart';
 
 class CoursesScreen extends StatefulWidget {
   @override
@@ -18,6 +23,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
   void initState() {
     super.initState();
     _coursesFuture = fetchAndCategorizeCourses();
+  }
+
+  String capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
   Future<Map<String, List<Map<String, dynamic>>>>
@@ -40,7 +50,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     // Process Front-End courses
     for (var doc in frontEndSnapshot.docs) {
       frontEndCourses.add({
-        'name': doc['name'],
+        'name': capitalize(doc['name']),
         'description': doc['description'],
         'logo_image': doc['logo_image'],
         'roadmap_image': doc['roadmap_image'],
@@ -53,7 +63,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     // Process Back-End courses
     for (var doc in backEndSnapshot.docs) {
       backEndCourses.add({
-        'name': doc['name'],
+        'name': capitalize(doc['name']),
         'description': doc['description'],
         'logo_image': doc['logo_image'],
         'roadmap_image': doc['roadmap_image'],
@@ -84,99 +94,126 @@ class _CoursesScreenState extends State<CoursesScreen> {
     final double padding = screenHeight * 0.01;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(padding),
-          child: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
-            future: _coursesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No courses available.'));
-              }
+        appBar: loginController().checkuser == "admin"
+            ? CustomAppBar(title: "Courses")
+            : null,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(padding),
+            child: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+              future: _coursesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No courses available.'));
+                }
 
-              final frontEndCourses = snapshot.data!['front-end']!;
-              final backEndCourses = snapshot.data!['back-end']!;
+                final frontEndCourses = snapshot.data!['front-end']!;
+                final backEndCourses = snapshot.data!['back-end']!;
 
-              // Filter courses based on the search query
-              final filteredFrontEndCourses = frontEndCourses
-                  .where((course) => course['name']
-                      .toString()
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase()))
-                  .toList();
-              final filteredBackEndCourses = backEndCourses
-                  .where((course) => course['name']
-                      .toString()
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase()))
-                  .toList();
+                // Filter courses based on the search query
+                final filteredFrontEndCourses = frontEndCourses
+                    .where((course) => course['name']
+                        .toString()
+                        .toLowerCase()
+                        .contains(_searchQuery.toLowerCase()))
+                    .toList();
+                final filteredBackEndCourses = backEndCourses
+                    .where((course) => course['name']
+                        .toString()
+                        .toLowerCase()
+                        .contains(_searchQuery.toLowerCase()))
+                    .toList();
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Looking for something...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(borderRadius),
-                        borderSide: BorderSide(color: Colors.black),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: screenHeight * 0.06,
+                      child: TextField(
+                        textAlignVertical: TextAlignVertical.center,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Looking for something...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(borderRadius),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          prefixIcon: Icon(Icons.search),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 8), // Adjust vertical padding if needed
+                        ),
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
                     ),
-                  ),
-                  SizedBox(height: rowSpacing),
-                  Text(
-                    'FRONT-END',
-                    style: TextStyle(
-                      fontSize: fontSize * 1.2,
-                      fontWeight: FontWeight.bold,
+                    SizedBox(height: rowSpacing),
+                    Text(
+                      'FRONT-END',
+                      style: TextStyle(
+                        fontSize: fontSize * 1.2,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: rowSpacing),
-                  _buildCourseList(
-                    filteredFrontEndCourses,
-                    containerWidth,
-                    containerHeight,
-                    rowSpacing,
-                    fontSize,
-                    borderRadius,
-                    context,
-                  ),
-                  SizedBox(height: rowSpacing),
-                  Text(
-                    'BACK-END',
-                    style: TextStyle(
-                      fontSize: fontSize * 1.2,
-                      fontWeight: FontWeight.bold,
+                    SizedBox(height: rowSpacing),
+                    _buildCourseList(
+                      filteredFrontEndCourses,
+                      containerWidth,
+                      containerHeight,
+                      rowSpacing,
+                      fontSize,
+                      borderRadius,
+                      context,
                     ),
-                  ),
-                  SizedBox(height: rowSpacing),
-                  _buildCourseList(
-                    filteredBackEndCourses,
-                    containerWidth,
-                    containerHeight,
-                    rowSpacing,
-                    fontSize,
-                    borderRadius,
-                    context,
-                  ),
-                ],
-              );
-            },
+                    SizedBox(height: rowSpacing),
+                    Text(
+                      'BACK-END',
+                      style: TextStyle(
+                        fontSize: fontSize * 1.2,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: rowSpacing),
+                    _buildCourseList(
+                      filteredBackEndCourses,
+                      containerWidth,
+                      containerHeight,
+                      rowSpacing,
+                      fontSize,
+                      borderRadius,
+                      context,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+        floatingActionButton: loginController().checkuser == "admin"
+            ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddCourseScreen(),
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+                backgroundColor: AppColors.backgroundColor,
+              )
+            : null);
   }
 
   Widget _buildCourseList(

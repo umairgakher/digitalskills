@@ -1,5 +1,8 @@
 // ignore_for_file: unnecessary_import, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last, use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
+import 'package:digitalskill/loginsignup/resetpasword.dart';
 import 'package:digitalskill/user/Userdashboard/user_dashboard.dart';
 import 'package:digitalskill/admin/admindashboard/admin_dashboard.dart';
 import 'package:digitalskill/colors/color.dart';
@@ -87,6 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildForgotPasswordButton() {
     return TextButton(
       onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+        );
         // Navigate to forgot password screen
         print('Forgot Password pressed!');
       },
@@ -132,11 +139,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       User? user = userCredential.user;
       if (user != null) {
+        fetchUserData(user.uid);
         // Navigate to dashboard based on user role
-        if (user.email == "admin@gmail.com") {
+        if (loginController().checkuser == "admin") {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => AdminDashboard()),
+            MaterialPageRoute(
+              builder: (context) => AdminDashboard(),
+            ),
           );
         } else {
           Navigator.pushReplacement(
@@ -281,4 +291,28 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+Future<Map<String, dynamic>?> fetchUserData(String uid) async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    try {
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        // Assuming userDoc.data() returns Map<String, dynamic>
+        var data = userDoc.data() as Map<String, dynamic>?;
+
+        // Update the singleton instance
+        loginController().checkuser = data?['checkuser'];
+        // loginController().user = data as List<String>;
+
+        return data;
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+  return null;
 }

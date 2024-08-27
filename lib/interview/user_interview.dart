@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
+// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_const_constructors, prefer_interpolation_to_compose_strings, non_constant_identifier_names, use_key_in_widget_constructors, prefer_final_fields, avoid_print, avoid_unnecessary_containers, sort_child_properties_last
 
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/widget/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -44,6 +45,9 @@ class _UserInterviewsPageState extends State<UserInterviewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     if (questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(
@@ -67,57 +71,92 @@ class _UserInterviewsPageState extends State<UserInterviewsPage> {
         title: _capitalizeWords(widget.interview['course_name']) + " Interview",
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Question ${currentQuestionIndex + 1}/${questions.length}',
-              style: TextStyle(fontSize: 24),
-            ),
-            SizedBox(height: 20),
-            Text(
-              questions[currentQuestionIndex]['question'],
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            ..._buildAnswerOptions(),
-            SizedBox(height: 20),
-            TextField(
-              controller: _answerController,
-              decoration: InputDecoration(
-                labelText: 'Your Answer',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.mic),
-                  onPressed: _listen,
+        padding: EdgeInsets.all(screenWidth * 0.04),
+        child: Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  'Question ${currentQuestionIndex + 1}/${questions.length}',
+                  style: TextStyle(fontSize: screenWidth * 0.06),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Conditionally render the "Previous Question" button
-                if (questions.length > 1 && currentQuestionIndex > 0)
-                  ElevatedButton(
-                    onPressed: _prevQuestion,
-                    child: Text('Prev'),
+              SizedBox(height: screenHeight * 0.02),
+              Text(
+                questions[currentQuestionIndex]['question'] + " ?",
+                style: TextStyle(fontSize: screenWidth * 0.045),
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              ..._buildAnswerOptions(screenWidth),
+              SizedBox(height: screenHeight * 0.02),
+              TextField(
+                controller: _answerController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(screenWidth * 0.08),
+                    borderSide: BorderSide.none,
                   ),
-                ElevatedButton(
-                  onPressed: _submitAnswer,
-                  child: Text(currentQuestionIndex < questions.length - 1
-                      ? 'Next'
-                      : 'Finish'),
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.02,
+                      horizontal: screenWidth * 0.05),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(screenWidth * 0.08),
+                    borderSide: BorderSide(color: AppColors.backgroundColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(screenWidth * 0.08),
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  labelText: 'Your Answer',
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.mic),
+                    onPressed: _listen,
+                  ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: currentQuestionIndex > 0
+                        ? _prevQuestion
+                        : null, // Disable Prev button on first question
+                    child: Text(
+                      'Prev',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: currentQuestionIndex > 0
+                          ? AppColors.backgroundColor
+                          : Colors.grey, // Change color to grey when disabled
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _submitAnswer,
+                    child: Text(
+                      currentQuestionIndex < questions.length - 1
+                          ? 'Next'
+                          : 'Finish',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.backgroundColor,
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildAnswerOptions() {
+  List<Widget> _buildAnswerOptions(double screenWidth) {
     // Safely retrieve the options for the current question
     List<String> options = List<String>.from(
       questions[currentQuestionIndex]['answers'] ?? [],
@@ -133,17 +172,19 @@ class _UserInterviewsPageState extends State<UserInterviewsPage> {
       String label = optionLabels[idx];
 
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).size.height * 0.005),
         child: Row(
           children: [
             Text(
               '$label. ', // Display label (A, B, C)
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: screenWidth * 0.045),
             ),
             Expanded(
               child: Text(
                 option, // Display the actual option text
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: screenWidth * 0.04),
               ),
             ),
           ],

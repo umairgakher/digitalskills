@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/loginsignup/login.dart';
+import 'package:digitalskill/loginsignup/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,19 +62,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textScaleFactor = mediaQuery.textScaleFactor;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Center(
-          child: Text(
-            "Edit Profile",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: AppColors.backgroundColor,
-      ),
+      appBar: loginController().checkuser == "admin"
+          ? AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Center(
+                child: Text(
+                  "Profile",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              backgroundColor: AppColors.backgroundColor,
+            )
+          : null,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(screenWidth * 0.04),
@@ -134,9 +137,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: CircleAvatar(
               radius: screenWidth * 0.25,
-              backgroundImage: profileImage != null && profileImage!.isNotEmpty
-                  ? NetworkImage(profileImage!)
-                  : AssetImage('assets/images/profilepic.png') as ImageProvider,
+              backgroundColor:
+                  Colors.grey[200], // Optional: Add a background color
+              child: profileImage != null && profileImage!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        profileImage!,
+                        fit: BoxFit.cover,
+                        width: screenWidth * 0.4,
+                        height: screenWidth * 0.4,
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      color: AppColors.backgroundColor,
+                      size: screenWidth * 0.25,
+                    ),
             ),
           ),
           Positioned(
