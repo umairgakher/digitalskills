@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/resume/cv_builder_screen.dart.dart';
 import 'package:flutter/material.dart';
 import '../courses/courses.dart';
 import '../resume/resumetamplate.dart';
@@ -204,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ResumeTemplateScreen(),
+                            builder: (context) => CVBuilderScreen(),
                           ),
                         );
                       },

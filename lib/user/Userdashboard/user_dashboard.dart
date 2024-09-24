@@ -1,6 +1,7 @@
 // ignore_for_file: unused_field, unused_local_variable, unused_element, prefer_const_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/feadback/feedback.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:digitalskill/colors/color.dart';
@@ -29,7 +30,7 @@ class UserDashboard extends StatefulWidget {
 
 class _UserDashboardState extends State<UserDashboard> {
   int _selectedIndex = 0;
-  String? text = "Courses";
+  String? text = "Home";
   double _appBarHeight = 60;
   User? _user;
   String? _userName;
@@ -63,7 +64,7 @@ class _UserDashboardState extends State<UserDashboard> {
     setState(() {
       _selectedIndex = index;
       if (index == 0) {
-        text = "Courses";
+        text = "Home";
       }
       if (index == 1) {
         text = "Interview";
@@ -181,6 +182,26 @@ class _UserDashboardState extends State<UserDashboard> {
                       style: TextStyle(fontSize: screenHeight * 0.025),
                     ),
                     onTap: () => _onDrawerItemTapped(3), // Profile
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.note,
+                      color: AppColors.backgroundColor,
+                    ),
+                    title: Text(
+                      "Feadback",
+                      style: TextStyle(fontSize: screenHeight * 0.025),
+                    ),
+                    onTap: () {
+                      // Implement logout functionality here FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => FeedbackScreen()),
+                        (Route<dynamic> route) => false,
+                      );
+                      // Navigate to login screen or show a confirmation dialog
+                    },
                   ),
                   Divider(),
                   ListTile(

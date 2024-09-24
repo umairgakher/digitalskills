@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
+import 'package:digitalskill/feadback/feedback.dart';
 import 'package:digitalskill/interview/Interview_questions_screen.dart';
 import 'package:digitalskill/loginsignup/login.dart';
 import 'package:digitalskill/profile/profile.dart';
@@ -12,7 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../user/Userdashboard/interview.dart';
-import '../../user/resume/updateresume.dart';
+import '../../user/resume/resumelistingadmin.dart';
 
 class AdminDashboard extends StatefulWidget {
   AdminDashboard({super.key});
@@ -136,22 +137,42 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Divider(),
                   ListTile(
                     leading: Icon(
-                      Icons.document_scanner,
+                      Icons.note,
                       color: AppColors.backgroundColor,
                     ),
                     title: Text(
-                      "Resume",
+                      "Feadback",
                       style: TextStyle(fontSize: screenHeight * 0.025),
                     ),
                     onTap: () {
-                      Navigator.push(
-                        context,
+                      // Implement logout functionality here FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                            builder: (context) => ResumeListScreen()),
+                            builder: (context) => FeedbackScreen()),
+                        (Route<dynamic> route) => false,
                       );
-                    }, // Resume
+                      // Navigate to login screen or show a confirmation dialog
+                    },
                   ),
                   Divider(),
+                  // ListTile(
+                  //   leading: Icon(
+                  //     Icons.document_scanner,
+                  //     color: AppColors.backgroundColor,
+                  //   ),
+                  //   title: Text(
+                  //     "Resume",
+                  //     style: TextStyle(fontSize: screenHeight * 0.025),
+                  //   ),
+                  //   onTap: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => ResumeListScreen()),
+                  //     );
+                  //   }, // Resume
+                  // ),
+                  // Divider(),
                   ListTile(
                     leading: Icon(
                       Icons.favorite,
@@ -229,20 +250,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 },
                 screenHeight: screenHeight,
               ),
-              SizedBox(height: 16.0), // Spacing between items
-              _buildDashboardItem(
-                title: 'CV/Resume',
-                height: screenHeight * 0.25, // 25% of screen height
-                backgroundColor: AppColors.backgroundColor,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ResumeListScreen()),
-                  );
-                },
-                screenHeight: screenHeight,
-              ),
-              SizedBox(height: 16.0), // Spacing between items
+              // SizedBox(height: screenHeight * 0.04), // Spacing between items
+              // _buildDashboardItem(
+              //   title: 'CV/Resume',
+              //   height: screenHeight * 0.25, // 25% of screen height
+              //   backgroundColor: AppColors.backgroundColor,
+              //   onTap: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => ResumeListScreen()),
+              //     );
+              //   },
+              //   screenHeight: screenHeight,
+              // ),
+              SizedBox(height: screenHeight * 0.04), // Spacing between items
               _buildDashboardItem(
                 title: 'Interviews',
                 height: screenHeight * 0.25, // 25% of screen height

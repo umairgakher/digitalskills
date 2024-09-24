@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, sized_box_for_whitespace, sort_child_properties_last
+// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, sized_box_for_whitespace, sort_child_properties_last, unused_local_variable
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/colors/color.dart';
@@ -91,7 +91,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
     final double fontSize = screenHeight * 0.02;
     final double borderRadius = screenHeight * 0.03;
-    final double padding = screenHeight * 0.01;
+    final double padding = screenHeight * 0.05;
 
     return Scaffold(
         appBar: loginController().checkuser == "admin"
@@ -99,7 +99,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
             : null,
         body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(padding),
+            padding: EdgeInsets.all(screenWidth * 0.05),
             child: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
               future: _coursesFuture,
               builder: (context, snapshot) {

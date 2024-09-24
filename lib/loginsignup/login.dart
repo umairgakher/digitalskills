@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_import, prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, unused_import, unnecessary_import, prefer_const_literals_to_create_immutables, sort_child_properties_last, use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitalskill/loginsignup/login_controller.dart';
@@ -19,15 +19,60 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  String? checkuser;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        color: AppColors.backgroundColor,
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 30.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(50)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: _buildLoginForm(size.width),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Column(
       children: [
-        SizedBox(height: 120.0), // Adjust the height as needed
+        SizedBox(height: 120.0),
         Text(
           'Login',
           style: TextStyle(
@@ -61,21 +106,18 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle:
-            TextStyle(color: Color.fromARGB(255, 175, 183, 230)), // Blue color
+        labelStyle: TextStyle(color: Color.fromARGB(255, 175, 183, 230)),
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-              color: Color.fromARGB(255, 175, 183, 230)), // Blue color
+          borderSide: BorderSide(color: Color.fromARGB(255, 175, 183, 230)),
         ),
         focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-              color: Color.fromARGB(255, 175, 183, 230)), // Light blue color
+          borderSide: BorderSide(color: Color.fromARGB(255, 175, 183, 230)),
         ),
         errorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.red), // Red color for errors
+          borderSide: BorderSide(color: Colors.red),
         ),
         focusedErrorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.red), // Red color for errors
+          borderSide: BorderSide(color: Colors.red),
         ),
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon != null
@@ -94,8 +136,6 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
         );
-        // Navigate to forgot password screen
-        print('Forgot Password pressed!');
       },
       child: Text(
         'Forgot Password?',
@@ -111,7 +151,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
-          // Form is valid, proceed with login
           _login();
         }
       },
@@ -129,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() async {
+  Future<void> _login() async {
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -139,14 +178,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       User? user = userCredential.user;
       if (user != null) {
-        fetchUserData(user.uid);
-        // Navigate to dashboard based on user role
-        if (loginController().checkuser == "admin") {
+        await fetchUserData(user.uid);
+        if (checkuser == "admin") {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => AdminDashboard(),
-            ),
+            MaterialPageRoute(builder: (context) => AdminDashboard()),
           );
         } else {
           Navigator.pushReplacement(
@@ -156,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = '';
+      String errorMessage;
       switch (e.code) {
         case 'user-not-found':
           errorMessage = 'No user found for that email.';
@@ -229,9 +265,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Navigate to sign up screen
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpScreen()),
+                  );
                 },
                 child: Text(
                   ' Sign up',
@@ -248,71 +285,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  Future<void> fetchUserData(String userId) async {
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    setState(() {
+      checkuser = snapshot['checkuser'] ?? 'user';
+      loginController().checkuser = snapshot['checkuser'] ?? 'user';
+    });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        color: AppColors.backgroundColor,
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 30.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(50)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10.0,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  child: _buildLoginForm(size.width),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Future<Map<String, dynamic>?> fetchUserData(String uid) async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    try {
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-      if (userDoc.exists) {
-        // Assuming userDoc.data() returns Map<String, dynamic>
-        var data = userDoc.data() as Map<String, dynamic>?;
-
-        // Update the singleton instance
-        loginController().checkuser = data?['checkuser'];
-        // loginController().user = data as List<String>;
-
-        return data;
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-    }
-  }
-  return null;
 }
