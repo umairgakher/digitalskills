@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:digitalskill/colors/color.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +16,7 @@ class _PersonalInformationSectionState
     extends State<PersonalInformationSection> {
   final ImagePicker _picker = ImagePicker();
   File? _profileImage;
-  String? _profileImageUrl; // To store the profile image URL
+  String? _profileImageUrl;
 
   // Controllers for form fields
   TextEditingController _firstNameController = TextEditingController();
@@ -38,7 +39,7 @@ class _PersonalInformationSectionState
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); // Fetch existing data on initialization
+    _fetchUserData();
   }
 
   Future<void> _fetchUserData() async {
@@ -49,7 +50,6 @@ class _PersonalInformationSectionState
     }
 
     try {
-      // Fetch document for the current user from 'user_resume' collection
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('user_resume')
           .doc(user.uid)
@@ -92,7 +92,7 @@ class _PersonalInformationSectionState
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _profileImage = File(pickedFile.path); // Directly using picked image
+        _profileImage = File(pickedFile.path);
       });
     }
   }
@@ -137,8 +137,7 @@ class _PersonalInformationSectionState
         'address': _addressController.text,
         'country': _countryController.text,
         'aboutMe': _aboutMeController.text,
-        'profileImage':
-            profileImageUrl ?? _profileImageUrl, // Save or use existing URL
+        'profileImage': profileImageUrl ?? _profileImageUrl,
       };
 
       await userDocRef.set(updatedData, SetOptions(merge: true));
@@ -156,58 +155,94 @@ class _PersonalInformationSectionState
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double padding = screenWidth * 0.05; // 5% of screen width for padding
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'Personal Information',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 24 * (screenWidth / 375),
+                fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 20),
-          GestureDetector(
-            onTap: _selectProfileImage,
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: _profileImage != null
-                  ? FileImage(_profileImage!)
-                  : (_profileImageUrl != null
-                      ? NetworkImage(_profileImageUrl!)
-                      : null) as ImageProvider?,
-              child: _profileImage == null && _profileImageUrl == null
-                  ? Icon(Icons.camera_alt, size: 50)
-                  : null,
+          SizedBox(height: 20 * (screenWidth / 375)),
+          Container(
+            width: screenWidth * 0.4, // Container width relative to screen size
+            height:
+                screenWidth * 0.4, // Container height relative to screen size
+            child: GestureDetector(
+              onTap: _selectProfileImage, // On tap to select a profile image
+              child: CircleAvatar(
+                backgroundColor:
+                    Colors.white, // Background color for the CircleAvatar
+                child: _profileImage != null
+                    ? ClipOval(
+                        child: Image.file(
+                          _profileImage!,
+                          width: screenWidth * 0.4,
+                          height: screenWidth * 0.4,
+                          fit: BoxFit
+                              .cover, // Ensures the image covers the circular container
+                        ),
+                      )
+                    : (_profileImageUrl != null
+                        ? ClipOval(
+                            child: Image.network(
+                              _profileImageUrl!,
+                              width: screenWidth * 0.4,
+                              height: screenWidth * 0.4,
+                              fit: BoxFit
+                                  .cover, // Ensures the image covers the circular container
+                            ),
+                          )
+                        : Icon(
+                            Icons.person,
+                            size: 50 *
+                                (screenWidth /
+                                    375), // Icon size relative to screen size
+                          )),
+              ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_firstNameController, 'First Name'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_lastNameController, 'Last Name'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_emailController, 'Email'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_phoneController, 'Phone'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_dobController, 'Date of Birth',
               readOnly: true, onTap: () => _selectDateOfBirth(context)),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_genderController, 'Gender'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_linkedinController, 'LinkedIn'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(
-              _instantMessagingController, 'Instant Messaging Whatsapp'),
-          SizedBox(height: 20),
+              _instantMessagingController, 'Instant Messaging (WhatsApp)'),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_addressController, 'Address'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_countryController, 'Country'),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           _buildTextField(_aboutMeController, 'About Me', maxLines: 10),
-          SizedBox(height: 20),
+          SizedBox(height: 20 * (screenWidth / 375)),
           ElevatedButton(
             onPressed: _savePersonalInformation,
-            child: Text('Save Information'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.backgroundColor,
+            ),
+            child: Text(
+              'Save Information',
+              style: TextStyle(
+                  color: Colors.white, fontSize: 18 * (screenWidth / 375)),
+            ),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/resume/models/education.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -162,56 +163,89 @@ class _EducationSectionState extends State<EducationSection> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final padding = screenWidth * 0.04; // Adjusts padding based on screen width
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Education',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.05, // Responsive font size
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 10),
-          _buildTextField(_degreeController, 'Degree'),
-          const SizedBox(height: 10),
-          _buildTextField(_institutionController, 'Institution'),
-          const SizedBox(height: 10),
-          _buildTextField(_locationController, 'Location'),
-          const SizedBox(height: 10),
-          _buildTextField(_graduationYearController, 'Graduation Year',
+          SizedBox(height: screenHeight * 0.02), // Responsive spacing
+          _buildTextField(_degreeController, 'Degree', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_institutionController, 'Institution', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_locationController, 'Location', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(
+              _graduationYearController, 'Graduation Year', screenWidth,
               onTap: () => _selectDate(context, _graduationYearController)),
-          const SizedBox(height: 10),
+          SizedBox(height: screenHeight * 0.02),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
                 onPressed: _addOrUpdateEducation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundColor,
+                ),
                 child: Text(
                   _editingIndex != null ? 'Update Education' : 'Add Education',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: screenWidth * 0.04, // Responsive button font size
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
-              if (_editingIndex == null) // Show Save button only when adding
+              SizedBox(width: screenWidth * 0.02),
+              if (_editingIndex == null)
                 ElevatedButton(
                   onPressed: _saveEducation,
-                  child: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor,
+                  ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenWidth * 0.04,
+                    ),
+                  ),
                 ),
             ],
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: screenHeight * 0.03),
+          Text(
             'Added Education:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.045,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           ..._educations.asMap().entries.map((entry) {
             int index = entry.key;
             Education education = entry.value;
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 5),
+              margin: EdgeInsets.symmetric(
+                  vertical: screenHeight * 0.01), // Responsive margin
               child: ListTile(
-                title:
-                    Text('${education.degree} from ${education.institution}'),
-                subtitle:
-                    Text('${education.graduationYear}\n${education.location}'),
+                title: Text(
+                  '${education.degree} from ${education.institution}',
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                ),
+                subtitle: Text(
+                  '${education.graduationYear}\n${education.location}',
+                  style: TextStyle(fontSize: screenWidth * 0.035),
+                ),
                 isThreeLine: true,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -234,13 +268,18 @@ class _EducationSectionState extends State<EducationSection> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
+  Widget _buildTextField(
+      TextEditingController controller, String label, double screenWidth,
       {Function()? onTap, int maxLines = 1}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: screenWidth * 0.035,
+          horizontal: screenWidth * 0.04,
+        ),
       ),
       maxLines: maxLines,
       onTap: onTap,

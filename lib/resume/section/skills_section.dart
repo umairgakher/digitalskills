@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/resume/models/skill.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -149,13 +150,28 @@ class _SkillsSectionState extends State<SkillsSection> {
             children: [
               ElevatedButton(
                 onPressed: _addSkill,
-                child:
-                    Text(_editingIndex != null ? 'Update Skill' : 'Add Skill'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor
+                    // Background color
+                    // Text color
+                    ),
+                child: Text(
+                  _editingIndex != null ? 'Update Skill' : 'Add Skill',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: _saveSkills,
-                child: const Text('Save'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor
+                    // Background color
+                    // Text color
+                    ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

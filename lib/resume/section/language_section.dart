@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -169,54 +170,96 @@ class _LanguageSkillSectionState extends State<LanguageSkillSection> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenWidth * 0.04),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Language Skills',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.045, // Adjust font size
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 10),
-          _buildTextField(_nameController, 'Language'),
-          const SizedBox(height: 10),
-          _buildTextField(_readingProficiencyController, 'Reading Proficiency'),
-          const SizedBox(height: 10),
-          _buildTextField(_writingProficiencyController, 'Writing Proficiency'),
-          const SizedBox(height: 10),
-          _buildTextField(
-              _speakingProficiencyController, 'Speaking Proficiency'),
-          const SizedBox(height: 20),
+          SizedBox(height: screenHeight * 0.02), // Responsive spacing
+          _buildTextField(_nameController, 'Language', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_readingProficiencyController, 'Reading Proficiency',
+              screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_writingProficiencyController, 'Writing Proficiency',
+              screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_speakingProficiencyController,
+              'Speaking Proficiency', screenWidth),
+          SizedBox(height: screenHeight * 0.03),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
                 onPressed: () => _addOrUpdateLanguageSkill(),
-                child: Text(_editingIndex == null
-                    ? 'Add Language Skill'
-                    : 'Update Language Skill'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundColor,
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.02,
+                    horizontal: screenWidth * 0.05,
+                  ),
+                ),
+                child: Text(
+                  _editingIndex == null
+                      ? 'Add Language Skill'
+                      : 'Update Language Skill',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.04, // Adjust font size
+                    color: Colors.white,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () => _saveLanguageSkills(),
-                child: const Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundColor,
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.02,
+                    horizontal: screenWidth * 0.05,
+                  ),
+                ),
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.04,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: screenHeight * 0.03),
+          Text(
             'Added Language Skills:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.04, // Adjust font size
+              fontWeight: FontWeight.bold,
+            ),
           ),
           ..._languageSkills.asMap().entries.map((entry) {
             int index = entry.key;
             LanguageSkill langSkill = entry.value;
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 5),
+              margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
               child: ListTile(
-                title: Text(langSkill.name),
+                title: Text(
+                  langSkill.name,
+                  style: TextStyle(fontSize: screenWidth * 0.045),
+                ),
                 subtitle: Text(
-                    'Reading: ${langSkill.readingProficiency}\nWriting: ${langSkill.writingProficiency}\nSpeaking: ${langSkill.speakingProficiency}'),
+                  'Reading: ${langSkill.readingProficiency}\nWriting: ${langSkill.writingProficiency}\nSpeaking: ${langSkill.speakingProficiency}',
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                ),
                 isThreeLine: true,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -239,12 +282,16 @@ class _LanguageSkillSectionState extends State<LanguageSkillSection> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label) {
-    return TextFormField(
+  Widget _buildTextField(
+      TextEditingController controller, String label, double screenWidth) {
+    return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
+      ),
+      style: TextStyle(
+        fontSize: screenWidth * 0.04, // Adjust font size
       ),
     );
   }

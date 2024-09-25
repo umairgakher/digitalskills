@@ -9,7 +9,7 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
  errors:
-  prefer_const_constructors: ignore ignore
+  prefer_const_constructors: ignore ignore ignore
   deprecated_member_use: ignore
   use_key_in_widget_constructors: ignore
   unused_import: ignore

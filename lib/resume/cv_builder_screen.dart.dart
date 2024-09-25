@@ -1,7 +1,7 @@
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/resume/preview.dart';
 import 'package:digitalskill/widget/appbar.dart';
 import 'package:flutter/material.dart';
-
 import 'models/cv_data.dart';
 import 'section/certifications_section.dart';
 import 'section/education_section.dart';
@@ -86,35 +86,60 @@ class _CVBuilderScreenState extends State<CVBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Create CV',
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _sections[_currentSectionIndex],
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.02), // Responsive spacing
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (_currentSectionIndex > 0)
                     ElevatedButton(
                       onPressed: _previousSection,
-                      child: const Text('Previous'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            AppColors.backgroundColor, // Background color
+                      ),
+                      child: const Text(
+                        'Previous',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   if (_currentSectionIndex < _sections.length - 1)
                     ElevatedButton(
                       onPressed: _nextSection,
-                      child: const Text('Next'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            AppColors.backgroundColor, // Background color
+                      ),
+                      child: const Text(
+                        'Next',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     )
                   else
                     ElevatedButton(
                       onPressed: _submitCV,
-                      child: const Text('Submit'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            AppColors.backgroundColor, // Background color
+                      ),
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                 ],
               ),

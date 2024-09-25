@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/resume/models/work_experience.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -202,15 +203,31 @@ class _WorkExperienceSectionState extends State<WorkExperienceSection> {
             children: [
               ElevatedButton(
                 onPressed: _addOrUpdateWorkExperience,
-                child: Text(_editingIndex == null
-                    ? 'Add Work Experience'
-                    : 'Update Work Experience'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor
+                    // Background color
+                    // Text color
+                    ),
+                child: Text(
+                  _editingIndex == null
+                      ? 'Add Work Experience'
+                      : 'Update Work Experience',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               SizedBox(width: 10),
               if (_editingIndex == null) // Show Save button only when adding
                 ElevatedButton(
                   onPressed: _saveWorkExperience,
-                  child: Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.backgroundColor
+                      // Background color
+                      // Text color
+                      ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
             ],
           ),

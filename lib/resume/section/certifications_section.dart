@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitalskill/colors/color.dart';
 import 'package:digitalskill/resume/models/certification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ class _CertificationSectionState extends State<CertificationSection> {
   final TextEditingController _organizationController = TextEditingController();
   final TextEditingController _dateObtainedController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   int? _editingIndex;
 
   @override
@@ -41,8 +41,7 @@ class _CertificationSectionState extends State<CertificationSection> {
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      controller.text = DateFormat('yyyy-MM-dd')
-          .format(pickedDate); // Show date in 'yyyy-MM-dd' format
+      controller.text = DateFormat('yyyy-MM-dd').format(pickedDate);
     }
   }
 
@@ -73,15 +72,13 @@ class _CertificationSectionState extends State<CertificationSection> {
         _dateObtainedController.text.isNotEmpty) {
       setState(() {
         if (_editingIndex != null) {
-          // Update the existing certification entry
           _certifications[_editingIndex!] = Certification(
             name: _nameController.text,
             issuingOrganization: _organizationController.text,
             dateObtained: _dateObtainedController.text,
           );
-          _editingIndex = null; // Reset editing index
+          _editingIndex = null;
         } else {
-          // Add a new certification entry
           _certifications.add(Certification(
             name: _nameController.text,
             issuingOrganization: _organizationController.text,
@@ -113,7 +110,7 @@ class _CertificationSectionState extends State<CertificationSection> {
     _nameController.clear();
     _organizationController.clear();
     _dateObtainedController.clear();
-    _editingIndex = null; // Clear editing index
+    _editingIndex = null;
   }
 
   Future<void> _saveCertifications() async {
@@ -125,12 +122,10 @@ class _CertificationSectionState extends State<CertificationSection> {
         'dateObtained': cert.dateObtained ?? "",
       };
     }).toList();
-
     try {
       await _firestore.collection('user_resume').doc(userId).update({
         'certifications': certificationData,
       });
-
       _showSnackBar('Certifications saved successfully!');
     } catch (e) {
       _showSnackBar('Failed to save certifications: $e');
@@ -145,66 +140,108 @@ class _CertificationSectionState extends State<CertificationSection> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Certifications',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.05, // Responsive font size
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 10),
-          _buildTextField(_nameController, 'Certification Name'),
-          const SizedBox(height: 10),
-          _buildTextField(_organizationController, 'Issuing Organization'),
-          const SizedBox(height: 10),
-          _buildTextField(_dateObtainedController, 'Date Obtained',
+          SizedBox(height: screenHeight * 0.02), // Responsive spacing
+          _buildTextField(_nameController, 'Certification Name', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(
+              _organizationController, 'Issuing Organization', screenWidth),
+          SizedBox(height: screenHeight * 0.02),
+          _buildTextField(_dateObtainedController, 'Date Obtained', screenWidth,
               onTap: () => _selectDate(context, _dateObtainedController)),
-          const SizedBox(height: 10),
+          SizedBox(height: screenHeight * 0.02),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
                 onPressed: _addOrUpdateCertification,
-                child: Text(_editingIndex != null
-                    ? 'Update Certification'
-                    : 'Add Certification'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backgroundColor,
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.02,
+                    horizontal: screenWidth * 0.1,
+                  ),
+                ),
+                child: Text(
+                  _editingIndex != null
+                      ? 'Update Certification'
+                      : 'Add Certification',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.04,
+                    color: Colors.white, // Responsive button text size
+                  ),
+                ),
               ),
-              const SizedBox(width: 10),
-              if (_editingIndex == null) // Show Save button only when adding
+              SizedBox(width: screenWidth * 0.02),
+              if (_editingIndex == null)
                 ElevatedButton(
                   onPressed: _saveCertifications,
-                  child: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor,
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.02,
+                      horizontal: screenWidth * 0.1,
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize:
+                          screenWidth * 0.04, // Responsive button text size
+                    ),
+                  ),
                 ),
             ],
           ),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: screenHeight * 0.03),
+          Text(
             'Added Certifications:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: screenWidth * 0.045, // Responsive font size
+              fontWeight: FontWeight.bold,
+            ),
           ),
           ..._certifications.asMap().entries.map((entry) {
             int index = entry.key;
             Certification certification = entry.value;
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 5),
+              margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
               child: ListTile(
-                title: Text(certification.name),
+                title: Text(
+                  certification.name,
+                  style: TextStyle(fontSize: screenWidth * 0.04),
+                ),
                 subtitle: Text(
-                    '${certification.issuingOrganization}\nObtained on: ${certification.dateObtained}'),
+                  '${certification.issuingOrganization}\nObtained on: ${certification.dateObtained}',
+                  style: TextStyle(fontSize: screenWidth * 0.035),
+                ),
                 isThreeLine: true,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.edit),
+                      icon: Icon(Icons.edit, size: screenWidth * 0.06),
                       onPressed: () {
                         _editCertification(index);
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: Icon(Icons.delete, size: screenWidth * 0.06),
                       onPressed: () => _removeCertification(index),
                     ),
                   ],
@@ -217,13 +254,18 @@ class _CertificationSectionState extends State<CertificationSection> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
+  Widget _buildTextField(
+      TextEditingController controller, String label, double screenWidth,
       {Function()? onTap, int maxLines = 1}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: screenWidth * 0.04,
+          horizontal: screenWidth * 0.04,
+        ),
       ),
       maxLines: maxLines,
       onTap: onTap,
